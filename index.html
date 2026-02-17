@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeMind Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9}
+body.light{background:#f1f5f9;color:#0f172a}
+
+/* HEADER */
+#header{position:sticky;top:0;z-index:100;background:rgba(15,23,42,0.95);border-bottom:1px solid rgba(255,255,255,0.1);padding:14px 16px}
+body.light #header{background:rgba(255,255,255,0.97);border-bottom:1px solid rgba(0,0,0,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+h1{font-size:22px;font-weight:800;background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-controls{display:flex;gap:8px;align-items:center}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+
+/* BUTTONS */
+button{cursor:pointer;font-family:inherit;font-weight:600;border:none;transition:all 0.2s}
+.tab{padding:9px 16px;border-radius:10px;font-size:13px;background:rgba(99,102,241,0.12);color:#a5b4fc;white-space:nowrap;border:1px solid rgba(99,102,241,0.2)}
+.tab.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-color:transparent}
+body.light .tab{background:rgba(99,102,241,0.08);color:#6366f1;border-color:rgba(99,102,241,0.2)}
+.btn{padding:11px 18px;border-radius:10px;font-size:14px;width:100%}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-ghost{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15)}
+body.light .btn-ghost{background:rgba(0,0,0,0.06);color:#0f172a;border-color:rgba(0,0,0,0.15)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px}
+.btn-icon{padding:9px 14px;border-radius:10px;font-size:18px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1)}
+body.light .btn-icon{background:rgba(0,0,0,0.06);border-color:rgba(0,0,0,0.12)}
+
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:6px}
+body.light .form-group label{color:#64748b}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(30,41,59,0.8);color:#f1f5f9;font-size:14px;font-family:inherit}
+body.light input,body.light select,body.light textarea{background:#fff;border-color:rgba(0,0,0,0.15);color:#0f172a}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+textarea{resize:vertical;min-height:100px}
+select option{background:#1e293b;color:#f1f5f9}
+
+/* LAYOUT */
+#main{padding:16px;max-width:900px;margin:0 auto}
+.card{background:rgba(30,41,59,0.7);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:16px}
+body.light .card{background:#fff;border-color:rgba(0,0,0,0.08);box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.card h2{font-size:20px;font-weight:700;margin-bottom:16px}
+.card h3{font-size:16px;font-weight:700;margin-bottom:12px}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+@media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat{padding:16px;border-radius:12px;border:1px solid rgba(99,102,241,0.2);background:rgba(99,102,241,0.08)}
+body.light .stat{background:rgba(99,102,241,0.05);border-color:rgba(99,102,241,0.2)}
+.stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:6px}
+body.light .stat-label{color:#64748b}
+.stat-val{font-size:24px;font-weight:800}
+.green{color:#10b981}.red{color:#ef4444}.purple{color:#8b5cf6}.blue{color:#6366f1}.amber{color:#f59e0b}
+
+/* CHART */
+.chart-wrap{height:300px;position:relative;margin-top:8px}
+
+/* ACCOUNT CARDS */
+.acc-card{border-radius:12px;border:1px solid rgba(255,255,255,0.08);padding:18px;margin-bottom:12px;background:rgba(30,41,59,0.5)}
+body.light .acc-card{background:#f8fafc;border-color:rgba(0,0,0,0.1)}
+.acc-card.active{border:2px solid #6366f1;background:rgba(99,102,241,0.08)}
+.acc-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
+.acc-name{font-size:18px;font-weight:700}
+.acc-balance{font-size:26px;font-weight:800;color:#6366f1;margin-bottom:6px}
+.acc-meta{font-size:12px;color:#94a3b8;margin-bottom:14px}
+body.light .acc-meta{color:#64748b}
+.acc-btns{display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase}
+.badge-funded{background:rgba(16,185,129,0.15);color:#10b981}
+.badge-challenge{background:rgba(99,102,241,0.15);color:#6366f1}
+.badge-demo{background:rgba(156,163,175,0.15);color:#9ca3af}
+.badge-active{background:rgba(16,185,129,0.15);color:#10b981}
+
+/* CALENDAR */
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day-label{text-align:center;font-size:11px;font-weight:700;color:#94a3b8;padding:6px 0}
+body.light .cal-day-label{color:#64748b}
+.cal-cell{min-height:70px;border-radius:10px;padding:8px;cursor:pointer;background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.05);transition:all 0.2s;position:relative}
+body.light .cal-cell{background:#f8fafc;border-color:rgba(0,0,0,0.06)}
+.cal-cell:hover{transform:scale(1.05);z-index:2;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.cal-cell.profit{background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.3)}
+.cal-cell.loss{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3)}
+.cal-cell.today{border:2px solid #6366f1;background:rgba(99,102,241,0.15)}
+.cal-cell.empty{background:transparent;border-color:transparent;pointer-events:none}
+.cal-num{font-size:13px;font-weight:700;margin-bottom:4px}
+.cal-pnl{font-size:11px;font-weight:700}
+.cal-count{font-size:10px;color:#94a3b8}
+body.light .cal-count{color:#64748b}
+
+/* HISTORY */
+.trade-row{display:flex;justify-content:space-between;align-items:center;padding:14px;border-radius:10px;background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.06);margin-bottom:8px}
+body.light .trade-row{background:#f8fafc;border-color:rgba(0,0,0,0.08)}
+.trade-info .instrument{font-size:16px;font-weight:700}
+.trade-info .meta{font-size:12px;color:#94a3b8;margin-top:3px}
+body.light .trade-info .meta{color:#64748b}
+.trade-pnl{text-align:right}
+.trade-pnl .pnl-val{font-size:20px;font-weight:800}
+.trade-pnl .rmult{font-size:12px;color:#94a3b8;margin-top:3px}
+body.light .trade-pnl .rmult{color:#64748b}
+.dir-tag{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.dir-buy{background:rgba(16,185,129,0.15);color:#10b981}
+.dir-sell{background:rgba(239,68,68,0.15);color:#ef4444}
+.plan-tag{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:4px}
+.plan-yes{background:rgba(99,102,241,0.15);color:#818cf8}
+.plan-no{background:rgba(239,68,68,0.12);color:#f87171}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+@media(min-width:600px){.metrics-grid{grid-template-columns:repeat(3,1fr)}}
+.metric-card{padding:16px;border-radius:12px;background:rgba(30,41,59,0.6);border:1px solid rgba(255,255,255,0.07)}
+body.light .metric-card{background:#f8fafc;border-color:rgba(0,0,0,0.08)}
+.metric-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:6px}
+body.light .metric-label{color:#64748b}
+.metric-val{font-size:22px;font-weight:800}
+
+/* SECTION HEADER */
+.section-h{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px}
+body.light .section-h{border-color:rgba(0,0,0,0.08)}
+
+/* JOURNAL */
+.journal-entry{padding:18px;border-radius:12px;background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.07);margin-bottom:12px}
+body.light .journal-entry{background:#f8fafc;border-color:rgba(0,0,0,0.08)}
+.journal-entry h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.journal-entry p{font-size:14px;color:#94a3b8;line-height:1.6}
+body.light .journal-entry p{color:#475569}
+.mood-grid{display:flex;gap:10px;justify-content:space-around;margin-bottom:16px}
+.mood-btn{font-size:28px;padding:8px;border-radius:12px;background:rgba(30,41,59,0.5);border:1px solid transparent;transition:all 0.2s}
+body.light .mood-btn{background:#f1f5f9}
+.mood-btn.selected{background:rgba(99,102,241,0.2);border-color:#6366f1;transform:scale(1.15)}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tag-btn{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(30,41,59,0.7);border:1px solid rgba(255,255,255,0.1);color:#94a3b8}
+body.light .tag-btn{background:#f1f5f9;border-color:rgba(0,0,0,0.1);color:#64748b}
+.tag-btn.selected{background:rgba(99,102,241,0.2);border-color:#6366f1;color:#a5b4fc}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;overflow-y:auto;padding:20px}
+.modal.open{display:flex;align-items:flex-start;justify-content:center}
+.modal-box{background:#1e293b;border-radius:20px;padding:24px;width:100%;max-width:500px;margin-top:20px;border:1px solid rgba(255,255,255,0.1)}
+body.light .modal-box{background:#fff;border-color:rgba(0,0,0,0.1)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h2{font-size:20px;font-weight:700}
+.modal-close{background:none;border:none;font-size:24px;color:#94a3b8;cursor:pointer;padding:0;line-height:1}
+
+/* SWITCH TABS */
+.switch{display:flex;gap:0;background:rgba(30,41,59,0.6);border-radius:12px;padding:4px;margin-bottom:16px}
+body.light .switch{background:rgba(0,0,0,0.06)}
+.switch button{flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:600;background:transparent;color:#94a3b8;border:none}
+body.light .switch button{color:#64748b}
+.switch button.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+
+/* ACTIVE TRADE CARD */
+.active-card{padding:16px;border-radius:12px;border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.07);margin-bottom:10px}
+.active-card h4{font-size:16px;font-weight:700;margin-bottom:8px}
+.active-card .meta{font-size:12px;color:#94a3b8;margin-bottom:12px}
+
+/* PROGRESS BAR */
+.progress-wrap{margin-bottom:6px}
+.progress-bar{height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden}
+body.light .progress-bar{background:rgba(0,0,0,0.08)}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.4s}
+
+/* ALERTS */
+.alert{padding:14px 16px;border-radius:12px;font-size:14px;font-weight:600;margin-bottom:12px}
+.alert-warning{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171}
+.alert-success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#34d399}
+.alert-info{background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc}
+
+/* NOTIFICATIONS */
+#notif-area{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.notif{padding:14px 20px;border-radius:12px;color:#fff;font-size:14px;font-weight:600;animation:notifIn 0.3s ease;box-shadow:0 4px 16px rgba(0,0,0,0.3);max-width:280px}
+.notif.success{background:linear-gradient(135deg,#10b981,#059669)}
+.notif.error{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.notif.info{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+@keyframes notifIn{from{transform:translateX(120px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* GRID HELPERS */
+.row{display:flex;gap:10px}.col{flex:1}
+.text-right{text-align:right}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}
+.flex{display:flex}.gap-8{gap:8px}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.hidden{display:none}
+hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:16px 0}
+body.light hr{border-color:rgba(0,0,0,0.08)}
+</style>
+
+</head>
+<body>
+
+<div id="notif-area"></div>
+
+<div id="header">
+  <div class="header-top">
+    <h1>📈 TradeMind Pro</h1>
+    <div class="header-controls">
+      <select id="acc-select" onchange="switchAccount(this.value)" style="padding:9px 12px;border-radius:10px;font-size:13px"></select>
+      <button class="btn-icon" onclick="toggleTheme()" id="theme-btn">☀️</button>
+      <button class="btn-icon" onclick="openModal('modal-add-trade')" title="Quick Log Trade">+</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button class="tab" onclick="showPage('logger',this)">📝 Logger</button>
+    <button class="tab" onclick="showPage('history',this)">📜 History</button>
+    <button class="tab" onclick="showPage('calendar',this)">📅 Calendar</button>
+    <button class="tab" onclick="showPage('journal',this)">📓 Journal</button>
+    <button class="tab" onclick="showPage('metrics',this)">🔥 Metrics</button>
+    <button class="tab" onclick="showPage('charts',this)">📈 Charts</button>
+    <button class="tab" onclick="showPage('accounts',this)">🏆 Accounts</button>
+    <button class="tab" onclick="showPage('rules',this)">⚙️ Rules</button>
+    <button class="tab" onclick="showPage('profile',this)">👤 Profile</button>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- DASHBOARD -->
+
+  <div id="page-dashboard">
+    <div id="dash-alerts"></div>
+    <div class="stats-grid" id="dash-stats"></div>
+    <div class="card">
+      <h2>Equity Curve</h2>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="tf-buttons"></div>
+      <div class="chart-wrap"><canvas id="equity-chart"></canvas></div>
+    </div>
+    <div class="card" id="dash-quick-stats"></div>
+  </div>
+
+  <!-- LOGGER -->
+
+  <div id="page-logger" class="hidden">
+    <div class="card">
+      <h2>Trade Logger</h2>
+      <div class="switch">
+        <button class="active" onclick="setLoggerMode('closed',this)">✅ Closed Trade</button>
+        <button onclick="setLoggerMode('active',this)">⚡ Active Trade</button>
+      </div>
+      <form id="trade-form" onsubmit="submitTrade(event)">
+        <div class="row">
+          <div class="col">
+            <div class="form-group"><label>Instrument</label><input id="f-instrument" placeholder="EUR/USD" required></div>
+          </div>
+          <div class="col">
+            <div class="form-group"><label>Direction</label>
+              <select id="f-direction"><option value="BUY">BUY / LONG</option><option value="SELL">SELL / SHORT</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="form-group"><label>Entry Price</label><input id="f-entry" type="number" step="0.00001" required></div>
+          </div>
+          <div class="col">
+            <div class="form-group"><label>Initial Risk ($)</label><input id="f-risk" type="number" step="0.01" placeholder="100"></div>
+          </div>
+        </div>
+        <div id="closed-fields">
+          <div class="row">
+            <div class="col">
+              <div class="form-group"><label>P/L ($)</label><input id="f-pnl" type="number" step="0.01"></div>
+            </div>
+            <div class="col">
+              <div class="form-group"><label>Outcome</label>
+                <select id="f-outcome"><option value="WIN">✅ WIN</option><option value="LOSS">❌ LOSS</option><option value="BREAKEVEN">➖ BREAKEVEN</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="form-group"><label>Exit Price</label><input id="f-exit" type="number" step="0.00001"></div>
+            </div>
+            <div class="col">
+              <div class="form-group"><label>Duration</label><input id="f-duration" placeholder="2h 30m"></div>
+            </div>
+          </div>
+        </div>
+        <div id="active-fields" class="hidden">
+          <div class="form-group"><label>Planned Exit Time ⏰</label><input id="f-exittime" type="datetime-local"></div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="form-group"><label>Strategy</label><input id="f-strategy" placeholder="Breakout, Pullback…"></div>
+          </div>
+          <div class="col">
+            <div class="form-group"><label>Session</label>
+              <select id="f-session"><option value="">Any</option><option>London</option><option>New York</option><option>Asia</option><option>Overlap</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="form-group"><label>Emotional State</label>
+              <select id="f-emotion"><option>Calm</option><option>Confident</option><option>FOMO</option><option>Revenge</option><option>Anxious</option></select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group"><label>Confidence (1–5)</label>
+              <select id="f-confidence"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="form-group"><label>Followed Plan?</label>
+          <select id="f-plan"><option value="true">✅ Yes</option><option value="false">❌ No</option></select>
+        </div>
+        <div class="form-group"><label>Notes</label><textarea id="f-notes" placeholder="What happened? What did you learn?"></textarea></div>
+        <button class="btn btn-primary" type="submit" id="log-btn">📝 Log Trade</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+
+  <div id="page-history" class="hidden">
+    <div class="card">
+      <div class="flex justify-between items-center mb-12">
+        <h2 style="margin:0">Trade History</h2>
+      </div>
+      <div class="switch">
+        <button class="active" onclick="setHistoryTab('closed',this)">📜 Closed</button>
+        <button onclick="setHistoryTab('active',this)">⚡ Active</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+
+  <div id="page-calendar" class="hidden">
+    <div class="card">
+      <div class="cal-header">
+        <button class="btn-ghost btn-sm" onclick="calNav(-1)">← Prev</button>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700" id="cal-title"></div>
+          <div id="cal-month-stats" style="font-size:13px;color:#94a3b8;margin-top:4px"></div>
+        </div>
+        <button class="btn-ghost btn-sm" onclick="calNav(1)">Next →</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+
+  <!-- JOURNAL -->
+
+  <div id="page-journal" class="hidden">
+    <div class="card">
+      <div class="flex justify-between items-center mb-12">
+        <h2 style="margin:0">Trading Journal</h2>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-journal')">+ New Entry</button>
+      </div>
+      <div id="journal-list"></div>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+
+  <div id="page-metrics" class="hidden">
+    <div id="metrics-content"></div>
+  </div>
+
+  <!-- CHARTS PAGE -->
+
+  <div id="page-charts" class="hidden">
+    <div class="card">
+      <h2>📈 Performance Charts</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="chart-type-btns">
+        <button class="btn btn-primary btn-sm" onclick="setChartType('progress',this)">📈 Progress</button>
+        <button class="btn-ghost btn-sm" onclick="setChartType('pnl',this)">💰 P/L per Trade</button>
+        <button class="btn-ghost btn-sm" onclick="setChartType('drawdown',this)">📉 Drawdown</button>
+        <button class="btn-ghost btn-sm" onclick="setChartType('winloss',this)">🥊 Win/Loss</button>
+        <button class="btn-ghost btn-sm" onclick="setChartType('session',this)">⏰ By Session</button>
+        <button class="btn-ghost btn-sm" onclick="setChartType('strategy',this)">🎯 By Strategy</button>
+        <button class="btn-ghost btn-sm" onclick="setChartType('rmult',this)">R️ R-Multiple</button>
+      </div>
+      <div id="chart-description" style="font-size:13px;color:#94a3b8;margin-bottom:12px"></div>
+      <div class="chart-wrap" style="height:380px"><canvas id="main-chart"></canvas></div>
+    </div>
+    <div class="card" id="chart-stats-card" style="display:none">
+      <div id="chart-stats"></div>
+    </div>
+  </div>
+
+  <!-- ACCOUNTS OVERVIEW -->
+
+  <div id="page-accounts" class="hidden">
+    <div id="accounts-overview"></div>
+  </div>
+
+  <!-- RULES -->
+
+  <div id="page-rules" class="hidden">
+    <div class="card">
+      <h2>⚙️ Risk Rules</h2>
+      <div class="form-group"><label>Daily Max Loss (%)</label><input id="r-daily" type="number" step="0.1"></div>
+      <div class="form-group"><label>Daily Profit Cap (%)</label><input id="r-cap" type="number" step="0.1"></div>
+      <div class="form-group"><label>Max Trades Per Day</label><input id="r-trades" type="number"></div>
+      <div class="form-group"><label>Max Risk Per Trade (%)</label><input id="r-risk" type="number" step="0.1"></div>
+      <button class="btn btn-primary" onclick="saveRules()">💾 Save Rules</button>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+
+  <div id="page-profile" class="hidden">
+    <div class="card">
+      <div class="flex justify-between items-center mb-12">
+        <h2 style="margin:0">Accounts</h2>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-account')">+ Add</button>
+      </div>
+      <div id="profile-list"></div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<!-- MODAL: ADD/EDIT ACCOUNT -->
+
+<div id="modal-add-account" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="acc-modal-title">New Account</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-account')">×</button>
+    </div>
+    <input type="hidden" id="edit-acc-id">
+    <div class="form-group"><label>Account Name</label><input id="acc-name" placeholder="Funded 50K"></div>
+    <div class="form-group"><label>Balance ($)</label><input id="acc-size" type="number" placeholder="50000"></div>
+    <div class="form-group"><label>Phase</label>
+      <select id="acc-phase"><option value="demo">Demo</option><option value="challenge">Challenge</option><option value="funded">Funded</option></select>
+    </div>
+    <div class="row">
+      <div class="col"><div class="form-group"><label>Daily Loss Limit (%)</label><input id="acc-daily" type="number" value="5" step="0.1"></div></div>
+      <div class="col"><div class="form-group"><label>Max Drawdown (%)</label><input id="acc-maxdd" type="number" value="10" step="0.1"></div></div>
+    </div>
+    <div id="acc-extra-fields" class="hidden">
+      <div class="form-group"><label>Challenge Target Profit ($)</label><input id="acc-target" type="number" placeholder="2500"></div>
+      <div class="form-group"><label>Funded Since (Date)</label><input id="acc-funded-date" type="date"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveAccount()">💾 Save Account</button>
+  </div>
+</div>
+
+<!-- MODAL: JOURNAL ENTRY -->
+
+<div id="modal-journal" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="journal-modal-title">Journal Entry</h2>
+      <button class="modal-close" onclick="closeModal('modal-journal')">×</button>
+    </div>
+    <input type="hidden" id="journal-date-key">
+    <div class="form-group"><label>Date</label><input id="j-date" type="date"></div>
+    <div class="form-group"><label>How did you feel?</label></div>
+    <div class="mood-grid" id="mood-selector">
+      <button class="mood-btn" data-mood="great" onclick="selectMood('great',this)">😄</button>
+      <button class="mood-btn" data-mood="good" onclick="selectMood('good',this)">😊</button>
+      <button class="mood-btn" data-mood="neutral" onclick="selectMood('neutral',this)" >😐</button>
+      <button class="mood-btn" data-mood="bad" onclick="selectMood('bad',this)">😞</button>
+      <button class="mood-btn" data-mood="terrible" onclick="selectMood('terrible',this)">😡</button>
+    </div>
+    <div class="form-group"><label>Tags</label></div>
+    <div class="tags-wrap" id="journal-tags">
+      <button class="tag-btn" onclick="toggleTag(this,'Focused')">Focused</button>
+      <button class="tag-btn" onclick="toggleTag(this,'Patient')">Patient</button>
+      <button class="tag-btn" onclick="toggleTag(this,'Disciplined')">Disciplined</button>
+      <button class="tag-btn" onclick="toggleTag(this,'Distracted')">Distracted</button>
+      <button class="tag-btn" onclick="toggleTag(this,'Impulsive')">Impulsive</button>
+      <button class="tag-btn" onclick="toggleTag(this,'Anxious')">Anxious</button>
+    </div>
+    <div class="form-group"><label>Journal Entry</label><textarea id="j-text" placeholder="How was your trading today? What did you learn? What went well or wrong?"></textarea></div>
+    <button class="btn btn-primary" onclick="saveJournal()">💾 Save Journal</button>
+  </div>
+</div>
+
+<!-- MODAL: CLOSE ACTIVE TRADE -->
+
+<div id="modal-close-trade" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Close Trade</h2>
+      <button class="modal-close" onclick="closeModal('modal-close-trade')">×</button>
+    </div>
+    <input type="hidden" id="close-trade-id">
+    <div id="close-trade-info" style="margin-bottom:16px;padding:12px;border-radius:10px;background:rgba(99,102,241,0.1)"></div>
+    <div class="form-group"><label>P/L ($)</label><input id="ct-pnl" type="number" step="0.01"></div>
+    <div class="form-group"><label>Outcome</label>
+      <select id="ct-outcome"><option value="WIN">✅ WIN</option><option value="LOSS">❌ LOSS</option><option value="BREAKEVEN">➖ BREAKEVEN</option></select>
+    </div>
+    <div class="form-group"><label>Followed Plan?</label>
+      <select id="ct-plan"><option value="true">✅ Yes</option><option value="false">❌ No</option></select>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="ct-notes" placeholder="What happened?"></textarea></div>
+    <button class="btn btn-primary" onclick="confirmCloseTrade()">✅ Close Trade</button>
+  </div>
+</div>
+
+<!-- MODAL: QUICK LOG TRADE -->
+
+<div id="modal-add-trade" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Quick Log Trade</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-trade')">×</button>
+    </div>
+    <div class="form-group"><label>Instrument</label><input id="qt-instrument" placeholder="EUR/USD" required></div>
+    <div class="row">
+      <div class="col"><div class="form-group"><label>Direction</label>
+        <select id="qt-direction"><option>BUY</option><option>SELL</option></select>
+      </div></div>
+      <div class="col"><div class="form-group"><label>P/L ($)</label><input id="qt-pnl" type="number" step="0.01"></div></div>
+    </div>
+    <div class="row">
+      <div class="col"><div class="form-group"><label>Entry</label><input id="qt-entry" type="number" step="0.00001"></div></div>
+      <div class="col"><div class="form-group"><label>Risk ($)</label><input id="qt-risk" type="number" step="0.01"></div></div>
+    </div>
+    <div class="form-group"><label>Outcome</label>
+      <select id="qt-outcome"><option value="WIN">✅ WIN</option><option value="LOSS">❌ LOSS</option><option value="BREAKEVEN">➖ BREAKEVEN</option></select>
+    </div>
+    <div class="form-group"><label>Followed Plan?</label>
+      <select id="qt-plan"><option value="true">✅ Yes</option><option value="false">❌ No</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="submitQuickTrade()">📝 Log Trade</button>
+  </div>
+</div>
+
+<!-- MODAL: CALENDAR DAY -->
+
+<div id="modal-cal-day" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="cal-day-title"></h2>
+      <button class="modal-close" onclick="closeModal('modal-cal-day')">×</button>
+    </div>
+    <div id="cal-day-content"></div>
+    <hr>
+    <button class="btn btn-primary" onclick="openJournalForDate()">📓 Write Journal for this Day</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════════════════
+const STORE_KEY = 'tradeMindV4';
+
+function defaultData() {
+  const d = {
+    accounts: [
+      { id: 'acc1', name: 'Funded 50K', size: 50000, initialBalance: 50000, phase: 'funded', dailyLossLimit: 5, maxDrawdown: 10, color: '#10b981' },
+      { id: 'acc2', name: 'Challenge 25K', size: 25000, initialBalance: 25000, phase: 'challenge', dailyLossLimit: 5, maxDrawdown: 8, targetProfit: 2500, color: '#6366f1' }
+    ],
+    activeAccountId: 'acc1',
+    trades: {},
+    activeTrades: {},
+    journals: {},
+    rules: { dailyMaxLoss: 2, dailyProfitCap: 4, maxTradesPerDay: 5, maxRiskPerTrade: 1 },
+    theme: 'dark'
+  };
+
+  // Generate 40 sample trades per account
+  ['acc1','acc2'].forEach(aid => {
+    d.trades[aid] = {};
+    let eq = d.accounts.find(a=>a.id===aid).initialBalance;
+    for (let i=40;i>=1;i--) {
+      const date = new Date(Date.now() - i * 24*60*60*1000);
+      const dk = date.toISOString().split('T')[0];
+      const win = Math.random() > 0.4;
+      const risk = 80 + Math.random()*150;
+      const rmult = win ? 0.5+Math.random()*2.5 : -(0.3+Math.random()*1.2);
+      const pnl = risk * rmult;
+      eq += pnl;
+      const instr = ['EUR/USD','GBP/USD','GOLD','US30','NAS100'][Math.floor(Math.random()*5)];
+      const strat = ['Breakout','Pullback','Trend Following','Range'][Math.floor(Math.random()*4)];
+      const sess = ['London','New York','Asia','Overlap'][Math.floor(Math.random()*4)];
+      const emotions = ['Calm','Confident','FOMO','Anxious'][Math.floor(Math.random()*4)];
+      if (!d.trades[aid][dk]) d.trades[aid][dk] = [];
+      d.trades[aid][dk].push({
+        id: `t_${aid}_${i}`,
+        date: dk,
+        timestamp: date.toISOString(),
+        instrument: instr,
+        direction: Math.random()>0.5?'BUY':'SELL',
+        entryPrice: 1.08 + Math.random()*0.01,
+        pnl, initialRisk: risk, rMultiple: rmult,
+        outcome: win?'WIN':'LOSS',
+        strategy: strat, session: sess,
+        emotionalState: emotions,
+        followedPlan: Math.random()>0.25,
+        equity: eq
+      });
+    }
+  });
+  return d;
+}
+
+let state = (() => {
+  try {
+    const s = localStorage.getItem(STORE_KEY);
+    return s ? JSON.parse(s) : defaultData();
+  } catch(e) { return defaultData(); }
+})();
+
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function getAccount() { return state.accounts.find(a=>a.id===state.activeAccountId); }
+function getTrades() {
+  const acc = state.trades[state.activeAccountId] || {};
+  return Object.values(acc).flat().sort((a,b) => new Date(a.timestamp)-new Date(b.timestamp));
+}
+function getActiveTrades() { return state.activeTrades[state.activeAccountId] || []; }
+
+// ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+function applyTheme() {
+  document.body.className = state.theme;
+  document.getElementById('theme-btn').textContent = state.theme==='dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  state.theme = state.theme==='dark' ? 'light' : 'dark';
+  applyTheme(); save();
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+let currentPage = 'dashboard';
+function showPage(page, btn) {
+  document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('page-'+page).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  currentPage = page;
+  renderPage(page);
+}
+function renderPage(page) {
+  if (page==='dashboard') renderDashboard();
+  else if (page==='history') renderHistory('closed');
+  else if (page==='calendar') renderCalendar();
+  else if (page==='journal') renderJournal();
+  else if (page==='metrics') renderMetrics();
+  else if (page==='accounts') renderAccountsOverview();
+  else if (page==='charts') renderCharts();
+  else if (page==='rules') renderRules();
+  else if (page==='profile') renderProfile();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACCOUNT SELECTOR
+// ═══════════════════════════════════════════════════════════
+function renderAccountSelector() {
+  const sel = document.getElementById('acc-select');
+  sel.innerHTML = state.accounts.map(a =>
+    `<option value="${a.id}" ${a.id===state.activeAccountId?'selected':''}>${a.name}</option>`
+  ).join('');
+}
+function switchAccount(id) {
+  state.activeAccountId = id;
+  save();
+  renderPage(currentPage);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+function notify(msg, type='success') {
+  const area = document.getElementById('notif-area');
+  const el = document.createElement('div');
+  el.className = `notif ${type}`;
+  el.textContent = msg;
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target===m) m.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+let equityChartInst = null;
+let currentTF = 'all';
+
+function renderDashboard() {
+  const acc = getAccount();
+  const trades = getTrades();
+  const active = getActiveTrades();
+
+  // Alerts
+  const today = new Date().toISOString().split('T')[0];
+  const todayTrades = (state.trades[state.activeAccountId]||{})[today]||[];
+  const todayPnL = todayTrades.reduce((s,t)=>s+(t.pnl||0),0);
+  const dailyLossAmt = acc.initialBalance * acc.dailyLossLimit / 100;
+  const alertsEl = document.getElementById('dash-alerts');
+  let alertsHTML = '';
+  if (active.length > 0) alertsHTML += `<div class="alert alert-info">⚡ ${active.length} active trade${active.length>1?'s':''} open</div>`;
+  if (todayPnL < 0 && Math.abs(todayPnL) > dailyLossAmt*0.8) alertsHTML += `<div class="alert alert-warning">⚠️ Approaching daily loss limit! Today: ${fmt(todayPnL)}</div>`;
+  alertsEl.innerHTML = alertsHTML;
+
+  // Stats
+  const total = trades.reduce((s,t)=>s+(t.pnl||0),0);
+  const wins = trades.filter(t=>(t.pnl||0)>0).length;
+  const wr = trades.length ? ((wins/trades.length)*100).toFixed(1) : '0.0';
+  const pf = calcPF(trades);
+  const eq = trades.length ? trades[trades.length-1].equity : acc.initialBalance;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat"><div class="stat-label">Total P/L</div><div class="stat-val ${total>=0?'green':'red'}">${fmt(total)}</div></div>
+    <div class="stat"><div class="stat-label">Today P/L</div><div class="stat-val ${todayPnL>=0?'green':'red'}">${fmt(todayPnL)}</div></div>
+    <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val blue">${wr}%</div></div>
+    <div class="stat"><div class="stat-label">Balance</div><div class="stat-val purple">${fmt(eq)}</div></div>
+  `;
+
+  // Timeframe buttons
+  const tfs = ['1W','1M','3M','ALL'];
+  document.getElementById('tf-buttons').innerHTML = tfs.map(tf =>
+    `<button class="btn-ghost btn-sm ${currentTF===tf.toLowerCase()?'btn-primary':''}" onclick="setTF('${tf.toLowerCase()}',this)">${tf}</button>`
+  ).join('');
+
+  // Quick stats
+  const avgWin = wins>0 ? trades.filter(t=>(t.pnl||0)>0).reduce((s,t)=>s+t.pnl,0)/wins : 0;
+  const losses = trades.filter(t=>(t.pnl||0)<0).length;
+  const avgLoss = losses>0 ? trades.filter(t=>(t.pnl||0)<0).reduce((s,t)=>s+t.pnl,0)/losses : 0;
+  const bestTrade = trades.length ? Math.max(...trades.map(t=>t.pnl||0)) : 0;
+  const worstTrade = trades.length ? Math.min(...trades.map(t=>t.pnl||0)) : 0;
+  document.getElementById('dash-quick-stats').innerHTML = `
+    <h3>📊 Quick Stats</h3>
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="metric-label">Avg Win</div><div class="metric-val green">${fmt(avgWin)}</div></div>
+      <div class="metric-card"><div class="metric-label">Avg Loss</div><div class="metric-val red">${fmt(avgLoss)}</div></div>
+      <div class="metric-card"><div class="metric-label">Profit Factor</div><div class="metric-val blue">${pf}</div></div>
+      <div class="metric-card"><div class="metric-label">Best Trade</div><div class="metric-val green">${fmt(bestTrade)}</div></div>
+      <div class="metric-card"><div class="metric-label">Worst Trade</div><div class="metric-val red">${fmt(worstTrade)}</div></div>
+      <div class="metric-card"><div class="metric-label">Expectancy</div><div class="metric-val purple">${fmt(calcExpectancy(trades))}</div></div>
+    </div>
+  `;
+
+  renderEquityChart(trades);
+}
+
+function setTF(tf, btn) {
+  currentTF = tf;
+  document.querySelectorAll('#tf-buttons button').forEach(b=>b.className='btn-ghost btn-sm');
+  btn.className = 'btn-primary btn-sm';
+  renderEquityChart(getTrades());
+}
+
+function filterByTF(trades) {
+  if (currentTF==='all') return trades;
+  const days = currentTF==='1w'?7:currentTF==='1m'?30:90;
+  const cutoff = new Date(Date.now()-days*24*60*60*1000);
+  return trades.filter(t=>new Date(t.timestamp)>=cutoff);
+}
+
+function renderEquityChart(allTrades) {
+  const acc = getAccount();
+  const trades = filterByTF(allTrades);
+  const canvas = document.getElementById('equity-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (equityChartInst) { equityChartInst.destroy(); equityChartInst=null; }
+  if (!trades.length) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = state.theme==='dark'?'#94a3b8':'#64748b';
+    ctx.font = '14px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('No trades to display', canvas.width/2, canvas.height/2);
+    return;
+  }
+
+  const init = acc.initialBalance;
+  const dailyLine = init * (1 - acc.dailyLossLimit/100);
+  const maxLine   = init * (1 - acc.maxDrawdown/100);
+
+  // Use date strings as labels (no adapter needed)
+  let eq = init;
+  const labels = [];
+  const eqData = [];
+  trades.forEach(t => {
+    eq += (t.pnl||0);
+    const d = new Date(t.timestamp);
+    labels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    eqData.push(parseFloat(eq.toFixed(2)));
+  });
+  // Add starting point
+  labels.unshift('Start');
+  eqData.unshift(init);
+  const dailyArr = Array(labels.length).fill(parseFloat(dailyLine.toFixed(2)));
+  const maxArr   = Array(labels.length).fill(parseFloat(maxLine.toFixed(2)));
+
+  const isDark = state.theme==='dark';
+  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+  const textColor = isDark ? '#94a3b8' : '#64748b';
+
+  // Show only every Nth label to avoid crowding
+  const step = Math.ceil(labels.length / 10);
+  const sparseLabels = labels.map((l,i) => i%step===0||i===labels.length-1 ? l : '');
+
+  equityChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sparseLabels,
+      datasets: [
+        {
+          label: 'Account Equity',
+          data: eqData,
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,0.12)',
+          borderWidth: 2.5, fill: true, tension: 0.3,
+          pointRadius: 0, pointHoverRadius: 5
+        },
+        {
+          label: `Daily Loss Limit (${acc.dailyLossLimit}%)  $${(dailyLine/1000).toFixed(1)}k`,
+          data: dailyArr,
+          borderColor: '#f59e0b',
+          borderWidth: 2, borderDash:[10,5],
+          pointRadius: 0, fill: false
+        },
+        {
+          label: `Max Drawdown (${acc.maxDrawdown}%)  $${(maxLine/1000).toFixed(1)}k`,
+          data: maxArr,
+          borderColor: '#ef4444',
+          borderWidth: 2, borderDash:[10,5],
+          pointRadius: 0, fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: textColor, font:{ size:12 }, boxWidth:24, padding:10 } },
+        tooltip: {
+          callbacks: {
+            label: c => `${c.dataset.label.split(' ')[0]==='Account'?'Equity':c.dataset.label.split('(')[0].trim()}: $${c.parsed.y.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`
+          }
+        }
+      },
+      scales: {
+        x: { ticks:{ color:textColor, maxRotation:0, autoSkip:true, maxTicksLimit:8 }, grid:{ color:gridColor } },
+        y: {
+          ticks:{ color:textColor, callback: v => '$'+(v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0)) },
+          grid:{ color:gridColor }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRADE LOGGER
+// ═══════════════════════════════════════════════════════════
+let loggerMode = 'closed';
+function setLoggerMode(m, btn) {
+  loggerMode = m;
+  document.querySelectorAll('.switch button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('closed-fields').classList.toggle('hidden', m==='active');
+  document.getElementById('active-fields').classList.toggle('hidden', m==='closed');
+  document.getElementById('log-btn').textContent = m==='active' ? '🚀 Create Active Trade' : '📝 Log Trade';
+}
+
+function submitTrade(e) {
+  e.preventDefault();
+  const instrument = document.getElementById('f-instrument').value.trim();
+  if (!instrument) return notify('Instrument is required','error');
+
+  const pnl = parseFloat(document.getElementById('f-pnl').value)||0;
+  const risk = parseFloat(document.getElementById('f-risk').value)||0;
+  const trade = {
+    id: 'tr_'+Date.now(),
+    accountId: state.activeAccountId,
+    instrument,
+    direction: document.getElementById('f-direction').value,
+    entryPrice: parseFloat(document.getElementById('f-entry').value)||0,
+    pnl, initialRisk: risk,
+    rMultiple: risk ? pnl/risk : 0,
+    outcome: document.getElementById('f-outcome').value,
+    exitPrice: parseFloat(document.getElementById('f-exit').value)||0,
+    duration: document.getElementById('f-duration').value,
+    strategy: document.getElementById('f-strategy').value,
+    session: document.getElementById('f-session').value,
+    emotionalState: document.getElementById('f-emotion').value,
+    confidence: parseInt(document.getElementById('f-confidence').value),
+    followedPlan: document.getElementById('f-plan').value==='true',
+    notes: document.getElementById('f-notes').value,
+    timestamp: new Date().toISOString(),
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  if (loggerMode==='active') {
+    trade.exitTime = document.getElementById('f-exittime').value;
+    trade.startTime = new Date().toISOString();
+    if (!state.activeTrades[state.activeAccountId]) state.activeTrades[state.activeAccountId]=[];
+    state.activeTrades[state.activeAccountId].push(trade);
+    notify('⚡ Active trade created!');
+  } else {
+    const dk = trade.date;
+    if (!state.trades[state.activeAccountId]) state.trades[state.activeAccountId]={};
+    if (!state.trades[state.activeAccountId][dk]) state.trades[state.activeAccountId][dk]=[];
+    state.trades[state.activeAccountId][dk].push(trade);
+    notify('✅ Trade logged!');
+  }
+  save();
+  document.getElementById('trade-form').reset();
+  renderDashboard();
+}
+
+function submitQuickTrade() {
+  const instrument = document.getElementById('qt-instrument').value.trim();
+  if (!instrument) return notify('Instrument required','error');
+  const pnl = parseFloat(document.getElementById('qt-pnl').value)||0;
+  const risk = parseFloat(document.getElementById('qt-risk').value)||0;
+  const dk = new Date().toISOString().split('T')[0];
+  const trade = {
+    id:'qtr_'+Date.now(), accountId:state.activeAccountId, instrument,
+    direction: document.getElementById('qt-direction').value,
+    entryPrice: parseFloat(document.getElementById('qt-entry').value)||0,
+    pnl, initialRisk: risk, rMultiple: risk?pnl/risk:0,
+    outcome: document.getElementById('qt-outcome').value,
+    followedPlan: document.getElementById('qt-plan').value==='true',
+    timestamp: new Date().toISOString(), date: dk
+  };
+  if (!state.trades[state.activeAccountId]) state.trades[state.activeAccountId]={};
+  if (!state.trades[state.activeAccountId][dk]) state.trades[state.activeAccountId][dk]=[];
+  state.trades[state.activeAccountId][dk].push(trade);
+  save();
+  closeModal('modal-add-trade');
+  notify('✅ Trade logged!');
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════
+let historyTab = 'closed';
+function setHistoryTab(tab, btn) {
+  historyTab = tab;
+  document.querySelectorAll('#page-history .switch button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory(tab);
+}
+
+function renderHistory(tab) {
+  const el = document.getElementById('history-list');
+  if (tab==='closed') {
+    const trades = getTrades().reverse();
+    if (!trades.length) { el.innerHTML='<p style="text-align:center;color:#94a3b8;padding:40px">No trades yet. Use Logger to add trades.</p>'; return; }
+    el.innerHTML = trades.slice(0,50).map(t => `
+      <div class="trade-row">
+        <div class="trade-info">
+          <div class="instrument">${t.instrument} <span class="dir-tag ${t.direction==='BUY'?'dir-buy':'dir-sell'}">${t.direction}</span><span class="plan-tag ${t.followedPlan?'plan-yes':'plan-no'}">${t.followedPlan?'✓ Plan':'✗ Plan'}</span></div>
+          <div class="meta">${fmtDate(t.timestamp)} · ${t.strategy||'—'} · ${t.session||'—'}</div>
+          ${t.duration?`<div class="meta">⏱ ${t.duration}</div>`:''}
+        </div>
+        <div class="trade-pnl">
+          <div class="pnl-val ${(t.pnl||0)>=0?'green':'red'}">${fmt(t.pnl||0)}</div>
+          ${t.rMultiple?`<div class="rmult">${t.rMultiple.toFixed(2)}R</div>`:''}
+        </div>
+      </div>`).join('');
+  } else {
+    const active = getActiveTrades();
+    if (!active.length) { el.innerHTML='<p style="text-align:center;color:#94a3b8;padding:40px">No active trades.</p>'; return; }
+    el.innerHTML = active.map(t => {
+      const overdue = t.exitTime && new Date(t.exitTime) < new Date();
+      const soon = t.exitTime && !overdue && (new Date(t.exitTime)-Date.now()) < 3600000;
+      return `
+      <div class="active-card">
+        <h4>${t.instrument} <span class="dir-tag ${t.direction==='BUY'?'dir-buy':'dir-sell'}">${t.direction}</span> ${overdue?'<span class="badge" style="background:rgba(239,68,68,0.2);color:#f87171">⏰ OVERDUE</span>':''} ${soon?'<span class="badge" style="background:rgba(245,158,11,0.2);color:#fbbf24">⏰ Exit Soon</span>':''}</h4>
+        <div class="meta">Entry: ${t.entryPrice} · Risk: ${fmt(t.initialRisk||0)} · ${fmtDate(t.startTime)}</div>
+        ${t.exitTime?`<div class="meta">Exit: ${new Date(t.exitTime).toLocaleString()}</div>`:''}
+        <button class="btn btn-primary btn-sm" onclick="openCloseTrade('${t.id}')">✅ Close Trade</button>
+      </div>`
+    }).join('');
+  }
+}
+
+function openCloseTrade(id) {
+  document.getElementById('close-trade-id').value = id;
+  const t = getActiveTrades().find(t=>t.id===id);
+  if (!t) return;
+  const dur = t.startTime ? calcDuration(t.startTime, new Date().toISOString()) : 'Unknown';
+  document.getElementById('close-trade-info').innerHTML = `<b>${t.instrument}</b> ${t.direction} · Entry: ${t.entryPrice} · Duration: ${dur}`;
+  openModal('modal-close-trade');
+}
+function confirmCloseTrade() {
+  const id = document.getElementById('close-trade-id').value;
+  const pnl = parseFloat(document.getElementById('ct-pnl').value)||0;
+  const outcome = document.getElementById('ct-outcome').value;
+  const followedPlan = document.getElementById('ct-plan').value==='true';
+  const notes = document.getElementById('ct-notes').value;
+  const active = state.activeTrades[state.activeAccountId]||[];
+  const t = active.find(t=>t.id===id);
+  if (!t) return;
+  const dk = new Date().toISOString().split('T')[0];
+  const closedAt = new Date().toISOString();
+  const closed = { ...t, pnl, outcome, followedPlan, notes, closedAt, date: dk, timestamp: closedAt, rMultiple: t.initialRisk ? pnl/t.initialRisk : 0, duration: calcDuration(t.startTime, closedAt) };
+  if (!state.trades[state.activeAccountId]) state.trades[state.activeAccountId]={};
+  if (!state.trades[state.activeAccountId][dk]) state.trades[state.activeAccountId][dk]=[];
+  state.trades[state.activeAccountId][dk].push(closed);
+  state.activeTrades[state.activeAccountId] = active.filter(t=>t.id!==id);
+  save();
+  closeModal('modal-close-trade');
+  notify('✅ Trade closed!');
+  renderHistory('active');
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════════
+let calDate = new Date();
+let calDayDate = null;
+
+function calNav(dir) { calDate = new Date(calDate.getFullYear(), calDate.getMonth()+dir, 1); renderCalendar(); }
+
+function renderCalendar() {
+  const year = calDate.getFullYear(), month = calDate.getMonth();
+  document.getElementById('cal-title').textContent = new Date(year,month,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const firstDay = new Date(year,month,1).getDay();
+  const lastDate = new Date(year,month+1,0).getDate();
+  const accTrades = state.trades[state.activeAccountId]||{};
+  const accJournals = state.journals[state.activeAccountId]||{};
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-cell empty"></div>`;
+
+  let monthPnL=0, monthTrades=0;
+  for(let d=1;d<=lastDate;d++) {
+    const dk = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayTrades = accTrades[dk]||[];
+    const pnl = dayTrades.reduce((s,t)=>s+(t.pnl||0),0);
+    const hasJournal = !!accJournals[dk];
+    monthPnL+=pnl; monthTrades+=dayTrades.length;
+    const cls = dk===todayStr?'today':pnl>0&&dayTrades.length?'profit':pnl<0&&dayTrades.length?'loss':'';
+    html+=`<div class="cal-cell ${cls}" onclick="openCalDay('${dk}')">
+      <div class="cal-num">${d}${hasJournal?' 📝':''}</div>
+      ${dayTrades.length?`<div class="cal-pnl ${pnl>=0?'green':'red'}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(0)}</div><div class="cal-count">${dayTrades.length} tr</div>`:''}
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  document.getElementById('cal-month-stats').innerHTML = `${monthTrades} trades · <span class="${monthPnL>=0?'green':'red'}">${fmt(monthPnL)}</span>`;
+}
+
+function openCalDay(dk) {
+  calDayDate = dk;
+  const d = new Date(dk+'T12:00:00');
+  document.getElementById('cal-day-title').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const dayTrades = (state.trades[state.activeAccountId]||{})[dk]||[];
+  const pnl = dayTrades.reduce((s,t)=>s+(t.pnl||0),0);
+  const journal = (state.journals[state.activeAccountId]||{})[dk];
+  const moodEmojis = {great:'😄',good:'😊',neutral:'😐',bad:'😞',terrible:'😡'};
+  document.getElementById('cal-day-content').innerHTML = `
+    ${journal?`<div class="alert alert-info" style="margin-bottom:12px">${moodEmojis[journal.mood]||''} <b>Mood:</b> ${journal.mood} ${journal.tags?.length?'· '+journal.tags.join(', '):''}<br><span style="color:#94a3b8;font-size:13px">${journal.text||''}</span></div>`:''}
+    <div style="font-weight:700;margin-bottom:12px">P/L: <span class="${pnl>=0?'green':'red'}">${fmt(pnl)}</span> · ${dayTrades.length} trades</div>
+    ${dayTrades.map(t=>`<div class="trade-row" style="margin-bottom:8px">
+      <div class="trade-info"><div class="instrument">${t.instrument} <span class="dir-tag ${t.direction==='BUY'?'dir-buy':'dir-sell'}">${t.direction}</span></div><div class="meta">${t.strategy||''}</div></div>
+      <div class="pnl-val ${(t.pnl||0)>=0?'green':'red'}">${fmt(t.pnl||0)}</div>
+    </div>`).join('') || '<p style="color:#94a3b8">No trades</p>'}
+  `;
+  openModal('modal-cal-day');
+}
+function openJournalForDate() {
+  closeModal('modal-cal-day');
+  openJournalModal(calDayDate);
+}
+
+// ═══════════════════════════════════════════════════════════
+// JOURNAL
+// ═══════════════════════════════════════════════════════════
+let selectedMood = 'neutral';
+let selectedTags = [];
+
+function selectMood(mood, btn) {
+  selectedMood = mood;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function toggleTag(btn, tag) {
+  if (selectedTags.includes(tag)) { selectedTags=selectedTags.filter(t=>t!==tag); btn.classList.remove('selected'); }
+  else { selectedTags.push(tag); btn.classList.add('selected'); }
+}
+function openJournalModal(dateKey) {
+  const existing = (state.journals[state.activeAccountId]||{})[dateKey];
+  selectedMood = existing?.mood||'neutral';
+  selectedTags = existing?.tags||[];
+  document.getElementById('journal-date-key').value = dateKey;
+  document.getElementById('j-date').value = dateKey;
+  document.getElementById('j-text').value = existing?.text||'';
+  document.getElementById('journal-modal-title').textContent = 'Journal · '+fmtDate(dateKey);
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('selected',b.dataset.mood===selectedMood));
+  document.querySelectorAll('.tag-btn').forEach(b=>b.classList.toggle('selected',selectedTags.includes(b.textContent)));
+  openModal('modal-journal');
+}
+function saveJournal() {
+  const dk = document.getElementById('j-date').value || document.getElementById('journal-date-key').value;
+  if (!dk) return notify('Select a date','error');
+  if (!state.journals[state.activeAccountId]) state.journals[state.activeAccountId]={};
+  state.journals[state.activeAccountId][dk] = { mood:selectedMood, tags:[...selectedTags], text:document.getElementById('j-text').value, timestamp:new Date().toISOString() };
+  save();
+  closeModal('modal-journal');
+  notify('📓 Journal saved!');
+  renderJournal();
+}
+function renderJournal() {
+  const journals = state.journals[state.activeAccountId]||{};
+  const entries = Object.keys(journals).sort((a,b)=>new Date(b)-new Date(a));
+  const moodEmojis={great:'😄',good:'😊',neutral:'😐',bad:'😞',terrible:'😡'};
+  document.getElementById('journal-list').innerHTML = entries.length ? entries.map(dk=>{
+    const e=journals[dk];
+    return `<div class="journal-entry">
+      <div class="flex justify-between items-center mb-8">
+        <h3>${fmtDate(dk)}</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:24px">${moodEmojis[e.mood]||'😐'}</span>
+          <button class="btn-ghost btn-sm" onclick="openJournalModal('${dk}')">Edit</button>
+        </div>
+      </div>
+      ${e.tags?.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${e.tags.map(t=>`<span class="badge badge-challenge">${t}</span>`).join('')}</div>`:''}
+      <p>${e.text||'No notes'}</p>
+    </div>`;
+  }).join('') : '<p style="text-align:center;color:#94a3b8;padding:40px">No journal entries. Click + New Entry or tap a calendar day.</p>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// METRICS
+// ═══════════════════════════════════════════════════════════
+function renderMetrics() {
+  const trades = getTrades();
+  if (!trades.length) { document.getElementById('metrics-content').innerHTML='<div class="card" style="text-align:center;padding:60px"><div style="font-size:60px">🔥</div><h2>No trades yet</h2><p style="color:#94a3b8;margin-top:8px">Log trades to see metrics</p></div>'; return; }
+
+  const wins = trades.filter(t=>(t.pnl||0)>0);
+  const losses = trades.filter(t=>(t.pnl||0)<0);
+  const wr = ((wins.length/trades.length)*100).toFixed(1);
+  const avgWin = wins.length ? wins.reduce((s,t)=>s+t.pnl,0)/wins.length : 0;
+  const avgLoss = losses.length ? losses.reduce((s,t)=>s+t.pnl,0)/losses.length : 0;
+  const tradesR = trades.filter(t=>t.initialRisk);
+  const avgR = tradesR.length ? tradesR.reduce((s,t)=>s+(t.rMultiple||0),0)/tradesR.length : 0;
+
+  // Session stats
+  const sessMap={};
+  trades.forEach(t=>{ const s=t.session||'Unknown'; if(!sessMap[s])sessMap[s]={pnl:0,count:0,wins:0}; sessMap[s].pnl+=(t.pnl||0);sessMap[s].count++;if((t.pnl||0)>0)sessMap[s].wins++; });
+
+  // Strategy stats
+  const stratMap={};
+  trades.forEach(t=>{ const s=t.strategy||'Unknown'; if(!stratMap[s])stratMap[s]={pnl:0,count:0,wins:0}; stratMap[s].pnl+=(t.pnl||0);stratMap[s].count++;if((t.pnl||0)>0)stratMap[s].wins++; });
+
+  // Emotion stats
+  const emoMap={};
+  trades.forEach(t=>{ const e=t.emotionalState||'Unknown'; if(!emoMap[e])emoMap[e]={pnl:0,count:0}; emoMap[e].pnl+=(t.pnl||0);emoMap[e].count++; });
+
+  // Plan stats
+  const planYes=trades.filter(t=>t.followedPlan===true);
+  const planNo=trades.filter(t=>t.followedPlan===false);
+  const planYesPnL=planYes.length?planYes.reduce((s,t)=>s+(t.pnl||0),0)/planYes.length:0;
+  const planNoPnL=planNo.length?planNo.reduce((s,t)=>s+(t.pnl||0),0)/planNo.length:0;
+
+  document.getElementById('metrics-content').innerHTML = `
+    <div class="card">
+      <h2>🔥 Advanced Metrics</h2>
+      <div class="section-h">📊 Core Performance</div>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Win Rate</div><div class="metric-val blue">${wr}%</div></div>
+        <div class="metric-card"><div class="metric-label">Profit Factor</div><div class="metric-val purple">${calcPF(trades)}</div></div>
+        <div class="metric-card"><div class="metric-label">Expectancy</div><div class="metric-val ${calcExpectancy(trades)>=0?'green':'red'}">${fmt(calcExpectancy(trades))}</div></div>
+        <div class="metric-card"><div class="metric-label">Avg R</div><div class="metric-val blue">${avgR.toFixed(2)}R</div></div>
+        <div class="metric-card"><div class="metric-label">Avg Win</div><div class="metric-val green">${fmt(avgWin)}</div></div>
+        <div class="metric-card"><div class="metric-label">Avg Loss</div><div class="metric-val red">${fmt(avgLoss)}</div></div>
+      </div>
+
+      <div class="section-h">🧠 Psychology & Discipline</div>
+      <div class="metrics-grid" style="grid-template-columns:1fr 1fr">
+        <div class="metric-card"><div class="metric-label">✅ Plan Followed (avg)</div><div class="metric-val ${planYesPnL>=0?'green':'red'}">${fmt(planYesPnL)}</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">${planYes.length} trades</div></div>
+        <div class="metric-card"><div class="metric-label">❌ Plan Ignored (avg)</div><div class="metric-val ${planNoPnL>=0?'green':'red'}">${fmt(planNoPnL)}</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">${planNo.length} trades</div></div>
+      </div>
+      <div class="metrics-grid">
+        ${Object.entries(emoMap).map(([e,s])=>`<div class="metric-card"><div class="metric-label">${e}</div><div class="metric-val ${s.pnl>=0?'green':'red'}">${fmt(s.pnl)}</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">${s.count} trades</div></div>`).join('')}
+      </div>
+
+      <div class="section-h">⏰ Session Performance</div>
+      <div class="metrics-grid">
+        ${Object.entries(sessMap).sort((a,b)=>b[1].pnl-a[1].pnl).map(([s,v])=>`<div class="metric-card"><div class="metric-label">${s}</div><div class="metric-val ${v.pnl>=0?'green':'red'}">${fmt(v.pnl)}</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">${v.count} tr · ${((v.wins/v.count)*100).toFixed(0)}% WR</div></div>`).join('')}
+      </div>
+
+      <div class="section-h">🎯 Strategy Performance</div>
+      ${Object.entries(stratMap).sort((a,b)=>b[1].pnl-a[1].pnl).map(([s,v])=>`
+        <div class="trade-row" style="margin-bottom:8px">
+          <div><div style="font-weight:700">${s}</div><div style="font-size:12px;color:#94a3b8">${v.count} trades · ${((v.wins/v.count)*100).toFixed(0)}% WR</div></div>
+          <div class="pnl-val ${v.pnl>=0?'green':'red'}">${fmt(v.pnl)}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACCOUNTS OVERVIEW
+// ═══════════════════════════════════════════════════════════
+function renderAccountsOverview() {
+  const el = document.getElementById('accounts-overview');
+  el.innerHTML = state.accounts.map(acc=>{
+    const trades = Object.values(state.trades[acc.id]||{}).flat();
+    const pnl = trades.reduce((s,t)=>s+(t.pnl||0),0);
+    const wins = trades.filter(t=>(t.pnl||0)>0).length;
+    const wr = trades.length ? ((wins/trades.length)*100).toFixed(1) : 0;
+    const pf = calcPF(trades);
+    const currentEq = acc.initialBalance + pnl;
+
+    let extra = '';
+    if (acc.phase==='funded' && acc.passedDate) {
+      const days = Math.floor((Date.now()-new Date(acc.passedDate))/(1000*60*60*24));
+      const rem = Math.max(0,14-days);
+      const pct = Math.min(days/14*100,100);
+      extra = `<div class="alert alert-${rem===0?'success':'info'}" style="margin-top:14px">
+        💰 Payout: <b>${rem===0?'✅ Eligible!':rem+' days remaining'}</b> (${days}/14 days)<br>
+        <div class="progress-wrap" style="margin-top:8px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:linear-gradient(135deg,#10b981,#059669)"></div></div></div>
+      </div>`;
+    }
+    if (acc.phase==='challenge' && acc.targetProfit) {
+      const pct = Math.min(Math.max(pnl/acc.targetProfit*100,0),100);
+      extra = `<div class="alert alert-info" style="margin-top:14px">
+        🎯 Challenge: <b>${fmt(pnl)} / ${fmt(acc.targetProfit)}</b> (${pct.toFixed(1)}%)<br>
+        <div class="progress-wrap" style="margin-top:8px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:linear-gradient(135deg,#6366f1,#8b5cf6)"></div></div></div>
+      </div>`;
+    }
+    return `<div class="card">
+      <div class="flex justify-between items-center mb-12">
+        <div><h2 style="margin:0">${acc.name}</h2><span class="badge badge-${acc.phase}" style="margin-top:6px;display:inline-block">${acc.phase}</span></div>
+        ${acc.id===state.activeAccountId?'<span class="badge badge-active">● Active</span>':'<button class="btn btn-primary btn-sm" onclick="switchAccount(\''+acc.id+'\')">Use Account</button>'}
+      </div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-label">Balance</div><div class="stat-val blue">${fmt(currentEq)}</div></div>
+        <div class="stat"><div class="stat-label">P/L</div><div class="stat-val ${pnl>=0?'green':'red'}">${fmt(pnl)}</div></div>
+        <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val purple">${wr}%</div></div>
+        <div class="stat"><div class="stat-label">Profit Factor</div><div class="stat-val amber">${pf}</div></div>
+      </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric-card"><div class="metric-label">Trades</div><div class="metric-val">${trades.length}</div></div>
+        <div class="metric-card"><div class="metric-label">Daily Limit</div><div class="metric-val red">${acc.dailyLossLimit}%</div></div>
+        <div class="metric-card"><div class="metric-label">Max DD</div><div class="metric-val red">${acc.maxDrawdown}%</div></div>
+      </div>
+      ${extra}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// RULES
+// ═══════════════════════════════════════════════════════════
+function renderRules() {
+  document.getElementById('r-daily').value = state.rules.dailyMaxLoss;
+  document.getElementById('r-cap').value = state.rules.dailyProfitCap;
+  document.getElementById('r-trades').value = state.rules.maxTradesPerDay;
+  document.getElementById('r-risk').value = state.rules.maxRiskPerTrade;
+}
+function saveRules() {
+  state.rules = {
+    dailyMaxLoss: parseFloat(document.getElementById('r-daily').value)||2,
+    dailyProfitCap: parseFloat(document.getElementById('r-cap').value)||4,
+    maxTradesPerDay: parseInt(document.getElementById('r-trades').value)||5,
+    maxRiskPerTrade: parseFloat(document.getElementById('r-risk').value)||1
+  };
+  save();
+  notify('✅ Rules saved!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════════════════════════
+function renderProfile() {
+  document.getElementById('profile-list').innerHTML = state.accounts.map(acc=>`
+    <div class="acc-card ${acc.id===state.activeAccountId?'active':''}">
+      <div class="acc-card-header">
+        <div>
+          <div class="acc-name">${acc.name}</div>
+          <span class="badge badge-${acc.phase}" style="margin-top:4px;display:inline-block">${acc.phase}</span>
+          ${acc.id===state.activeAccountId?'<span class="badge badge-active" style="margin-left:6px">Active</span>':''}
+        </div>
+      </div>
+      <div class="acc-balance">${fmt(acc.size)}</div>
+      <div class="acc-meta">Daily: ${acc.dailyLossLimit}% · Max DD: ${acc.maxDrawdown}%</div>
+      <div class="acc-btns">
+        ${acc.id!==state.activeAccountId?`<button class="btn btn-primary btn-sm" onclick="switchAccount('${acc.id}');renderProfile()">Set Active</button>`:''}
+        <button class="btn-ghost btn-sm" onclick="editAccount('${acc.id}')">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAccount('${acc.id}')">🗑 Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function editAccount(id) {
+  const acc = state.accounts.find(a=>a.id===id);
+  document.getElementById('edit-acc-id').value = id;
+  document.getElementById('acc-modal-title').textContent = 'Edit Account';
+  document.getElementById('acc-name').value = acc.name;
+  document.getElementById('acc-size').value = acc.size;
+  document.getElementById('acc-phase').value = acc.phase||'demo';
+  document.getElementById('acc-daily').value = acc.dailyLossLimit||5;
+  document.getElementById('acc-maxdd').value = acc.maxDrawdown||10;
+  document.getElementById('acc-target').value = acc.targetProfit||'';
+  document.getElementById('acc-funded-date').value = acc.passedDate?acc.passedDate.split('T')[0]:'';
+  document.getElementById('acc-extra-fields').classList.remove('hidden');
+  openModal('modal-add-account');
+}
+
+document.getElementById('acc-phase').addEventListener('change', function() {
+  const show = this.value==='challenge'||this.value==='funded';
+  document.getElementById('acc-extra-fields').classList.toggle('hidden', !show);
+});
+
+function saveAccount() {
+  const id = document.getElementById('edit-acc-id').value;
+  const name = document.getElementById('acc-name').value.trim();
+  const size = parseFloat(document.getElementById('acc-size').value);
+  if (!name || !size) return notify('Name and balance required','error');
+  const phase = document.getElementById('acc-phase').value;
+  const dl = parseFloat(document.getElementById('acc-daily').value)||5;
+  const mdd = parseFloat(document.getElementById('acc-maxdd').value)||10;
+  const target = parseFloat(document.getElementById('acc-target').value)||null;
+  const passedDate = document.getElementById('acc-funded-date').value ? new Date(document.getElementById('acc-funded-date').value).toISOString() : null;
+
+  if (id) {
+    state.accounts = state.accounts.map(a=>a.id===id?{...a,name,size,phase,dailyLossLimit:dl,maxDrawdown:mdd,targetProfit:target,passedDate}:a);
+    notify('✅ Account updated!');
+  } else {
+    const newAcc = {id:'acc_'+Date.now(),name,size,initialBalance:size,phase,dailyLossLimit:dl,maxDrawdown:mdd,targetProfit:target,passedDate,color:'#6366f1'};
+    state.accounts.push(newAcc);
+    notify('✅ Account created!');
+  }
+  save();
+  document.getElementById('edit-acc-id').value='';
+  document.getElementById('acc-modal-title').textContent='New Account';
+  closeModal('modal-add-account');
+  renderProfile();
+  renderAccountSelector();
+}
+
+function deleteAccount(id) {
+  if (state.accounts.length===1) return notify('Cannot delete last account!','error');
+  if (!confirm('Delete this account? All trades will be lost.')) return;
+  state.accounts = state.accounts.filter(a=>a.id!==id);
+  delete state.trades[id];
+  delete state.activeTrades[id];
+  if (state.activeAccountId===id) state.activeAccountId=state.accounts[0].id;
+  save();
+  notify('🗑 Account deleted');
+  renderProfile();
+  renderAccountSelector();
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// CHARTS PAGE
+// ═══════════════════════════════════════════════════════════
+let mainChartInst = null;
+let currentChartType = 'progress';
+
+function setChartType(type, btn) {
+  currentChartType = type;
+  document.querySelectorAll('#chart-type-btns button').forEach(b=>{ b.className='btn-ghost btn-sm'; });
+  btn.className='btn btn-primary btn-sm';
+  renderCharts();
+}
+
+function renderCharts() {
+  const trades = getTrades();
+  const acc = getAccount();
+  const isDark = state.theme==='dark';
+  const gridColor = isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';
+  const textColor = isDark?'#94a3b8':'#64748b';
+  const statsCard = document.getElementById('chart-stats-card');
+  const descEl = document.getElementById('chart-description');
+  statsCard.style.display='none';
+
+  const canvas = document.getElementById('main-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (mainChartInst) { mainChartInst.destroy(); mainChartInst=null; }
+
+  if (!trades.length) {
+    descEl.textContent = 'No trades to display yet.';
+    return;
+  }
+
+  const commonOpts = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:textColor, font:{size:12}, boxWidth:20, padding:10 } } },
+    scales:{
+      x:{ ticks:{color:textColor,maxRotation:0,autoSkip:true,maxTicksLimit:10}, grid:{color:gridColor} },
+      y:{ ticks:{color:textColor}, grid:{color:gridColor} }
+    }
+  };
+
+  if (currentChartType==='progress') {
+    descEl.textContent = 'Cumulative equity growth over all trades. Blue = account balance. Dotted lines = your drawdown limits.';
+    let eq = acc.initialBalance;
+    const labels=['Start'], eqData=[acc.initialBalance];
+    trades.forEach(t => {
+      eq += (t.pnl||0);
+      labels.push(new Date(t.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+      eqData.push(parseFloat(eq.toFixed(2)));
+    });
+    const step = Math.ceil(labels.length/10);
+    const sl = labels.map((l,i)=>i%step===0||i===labels.length-1?l:'');
+    const dl = acc.initialBalance*(1-acc.dailyLossLimit/100);
+    const ml = acc.initialBalance*(1-acc.maxDrawdown/100);
+    mainChartInst = new Chart(ctx,{
+      type:'line',
+      data:{ labels:sl, datasets:[
+        {label:'Equity',data:eqData,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.12)',borderWidth:3,fill:true,tension:0.3,pointRadius:0,pointHoverRadius:5},
+        {label:`Daily Loss ${acc.dailyLossLimit}%`,data:Array(labels.length).fill(dl),borderColor:'#f59e0b',borderWidth:2,borderDash:[8,4],pointRadius:0,fill:false},
+        {label:`Max DD ${acc.maxDrawdown}%`,data:Array(labels.length).fill(ml),borderColor:'#ef4444',borderWidth:2,borderDash:[8,4],pointRadius:0,fill:false}
+      ]},
+      options:{...commonOpts, interaction:{mode:'index',intersect:false}, plugins:{...commonOpts.plugins, tooltip:{callbacks:{label:c=>`${c.dataset.label}: $${c.parsed.y.toLocaleString()}`}}}, scales:{...commonOpts.scales,y:{...commonOpts.scales.y,ticks:{...commonOpts.scales.y.ticks,callback:v=>'$'+(v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0))}}}}
+    });
+
+  } else if (currentChartType==='pnl') {
+    descEl.textContent = 'P/L for each individual trade. Green = profit, Red = loss. Shows consistency and outliers.';
+    const last50 = trades.slice(-50);
+    const labels = last50.map((t,i)=>`#${i+1} ${t.instrument}`);
+    const data = last50.map(t=>parseFloat((t.pnl||0).toFixed(2)));
+    const colors = data.map(v=>v>=0?'rgba(16,185,129,0.75)':'rgba(239,68,68,0.75)');
+    const borders = data.map(v=>v>=0?'#10b981':'#ef4444');
+    mainChartInst = new Chart(ctx,{
+      type:'bar',
+      data:{labels, datasets:[{label:'P/L ($)',data,backgroundColor:colors,borderColor:borders,borderWidth:1,borderRadius:4}]},
+      options:{...commonOpts,scales:{...commonOpts.scales,y:{...commonOpts.scales.y,ticks:{...commonOpts.scales.y.ticks,callback:v=>'$'+v.toLocaleString()}}}}
+    });
+
+  } else if (currentChartType==='drawdown') {
+    descEl.textContent = 'Running drawdown from your peak equity. Shows your worst periods and recovery.';
+    let peak = acc.initialBalance, eq2 = acc.initialBalance;
+    const labels=[], ddData=[], dailyLine=[], maxLine=[];
+    trades.forEach((t,i)=>{
+      eq2+=(t.pnl||0);
+      if(eq2>peak) peak=eq2;
+      const dd = ((eq2-peak)/peak)*100;
+      labels.push(new Date(t.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+      ddData.push(parseFloat(dd.toFixed(2)));
+      dailyLine.push(-acc.dailyLossLimit);
+      maxLine.push(-acc.maxDrawdown);
+    });
+    const step=Math.ceil(labels.length/10);
+    const sl=labels.map((l,i)=>i%step===0||i===labels.length-1?l:'');
+    mainChartInst = new Chart(ctx,{
+      type:'line',
+      data:{labels:sl,datasets:[
+        {label:'Drawdown %',data:ddData,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.15)',borderWidth:2.5,fill:true,tension:0.3,pointRadius:0},
+        {label:`Daily Limit -${acc.dailyLossLimit}%`,data:dailyLine,borderColor:'#f59e0b',borderWidth:2,borderDash:[8,4],pointRadius:0,fill:false},
+        {label:`Max DD -${acc.maxDrawdown}%`,data:maxLine,borderColor:'#ef4444',borderWidth:2,borderDash:[8,4],pointRadius:0,fill:false}
+      ]},
+      options:{...commonOpts,interaction:{mode:'index',intersect:false},scales:{...commonOpts.scales,y:{...commonOpts.scales.y,ticks:{...commonOpts.scales.y.ticks,callback:v=>v+'%'}}}}
+    });
+
+  } else if (currentChartType==='winloss') {
+    descEl.textContent = 'Overall win/loss breakdown. Pie chart showing trade outcomes.';
+    const wins=trades.filter(t=>(t.pnl||0)>0).length;
+    const losses=trades.filter(t=>(t.pnl||0)<0).length;
+    const be=trades.filter(t=>(t.pnl||0)===0).length;
+    mainChartInst = new Chart(ctx,{
+      type:'doughnut',
+      data:{labels:['Wins','Losses','Breakeven'],datasets:[{data:[wins,losses,be],backgroundColor:['rgba(16,185,129,0.8)','rgba(239,68,68,0.8)','rgba(156,163,175,0.5)'],borderColor:['#10b981','#ef4444','#9ca3af'],borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor,font:{size:14},padding:16}},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} trades (${((c.parsed/(wins+losses+be))*100).toFixed(1)}%)`}}}}
+    });
+    // Show stats below
+    statsCard.style.display='block';
+    const gp=trades.filter(t=>(t.pnl||0)>0).reduce((s,t)=>s+t.pnl,0);
+    const gl=Math.abs(trades.filter(t=>(t.pnl||0)<0).reduce((s,t)=>s+t.pnl,0));
+    document.getElementById('chart-stats').innerHTML=`
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Gross Profit</div><div class="metric-val green">${fmt(gp)}</div></div>
+        <div class="metric-card"><div class="metric-label">Gross Loss</div><div class="metric-val red">${fmt(-gl)}</div></div>
+        <div class="metric-card"><div class="metric-label">Net P/L</div><div class="metric-val ${gp-gl>=0?'green':'red'}">${fmt(gp-gl)}</div></div>
+      </div>`;
+
+  } else if (currentChartType==='session') {
+    descEl.textContent = 'Total P/L grouped by trading session. Identify your best and worst sessions.';
+    const sessMap={};
+    trades.forEach(t=>{const s=t.session||'Unknown';if(!sessMap[s])sessMap[s]=0;sessMap[s]+=(t.pnl||0);});
+    const sessions=Object.keys(sessMap).sort((a,b)=>sessMap[b]-sessMap[a]);
+    const vals=sessions.map(s=>parseFloat(sessMap[s].toFixed(2)));
+    const colors=vals.map(v=>v>=0?'rgba(16,185,129,0.75)':'rgba(239,68,68,0.75)');
+    mainChartInst = new Chart(ctx,{
+      type:'bar',
+      data:{labels:sessions,datasets:[{label:'Total P/L by Session',data:vals,backgroundColor:colors,borderColor:colors.map(c=>c.replace('0.75','1')),borderWidth:1,borderRadius:6}]},
+      options:{...commonOpts,indexAxis:'y',scales:{x:{...commonOpts.scales.x,ticks:{...commonOpts.scales.x.ticks,callback:v=>'$'+v.toLocaleString()}},y:{...commonOpts.scales.y}}}
+    });
+
+  } else if (currentChartType==='strategy') {
+    descEl.textContent = 'Total P/L per strategy. Use this to double down on what works and cut what doesn't.';
+    const stratMap={};
+    trades.forEach(t=>{const s=t.strategy||'No Strategy';if(!stratMap[s])stratMap[s]=0;stratMap[s]+=(t.pnl||0);});
+    const strats=Object.keys(stratMap).sort((a,b)=>stratMap[b]-stratMap[a]);
+    const vals=strats.map(s=>parseFloat(stratMap[s].toFixed(2)));
+    const colors=vals.map(v=>v>=0?'rgba(99,102,241,0.75)':'rgba(239,68,68,0.75)');
+    mainChartInst = new Chart(ctx,{
+      type:'bar',
+      data:{labels:strats,datasets:[{label:'Total P/L by Strategy',data:vals,backgroundColor:colors,borderColor:colors.map(c=>c.replace('0.75','1')),borderWidth:1,borderRadius:6}]},
+      options:{...commonOpts,indexAxis:'y',scales:{x:{...commonOpts.scales.x,ticks:{...commonOpts.scales.x.ticks,callback:v=>'$'+v.toLocaleString()}},y:{...commonOpts.scales.y}}}
+    });
+
+  } else if (currentChartType==='rmult') {
+    descEl.textContent = 'R-Multiple per trade. Each bar = how many R you made or lost. Target: consistent +R trades.';
+    const rTrades=trades.filter(t=>t.initialRisk).slice(-50);
+    const labels=rTrades.map((t,i)=>`#${i+1}`);
+    const data=rTrades.map(t=>parseFloat((t.rMultiple||0).toFixed(2)));
+    const colors=data.map(v=>v>=0?'rgba(16,185,129,0.75)':'rgba(239,68,68,0.75)');
+    const avgR=data.length?data.reduce((s,v)=>s+v,0)/data.length:0;
+    mainChartInst = new Chart(ctx,{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[
+          {label:'R-Multiple',data,backgroundColor:colors,borderColor:colors.map(c=>c.replace('0.75','1')),borderWidth:1,borderRadius:4},
+          {label:`Avg R (${avgR.toFixed(2)})`,data:Array(labels.length).fill(parseFloat(avgR.toFixed(2))),type:'line',borderColor:'#f59e0b',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:false}
+        ]
+      },
+      options:{...commonOpts,interaction:{mode:'index',intersect:false},scales:{...commonOpts.scales,y:{...commonOpts.scales.y,ticks:{...commonOpts.scales.y.ticks,callback:v=>v+'R'}}}}
+    });
+    statsCard.style.display='block';
+    const posR=data.filter(v=>v>0),negR=data.filter(v=>v<0);
+    document.getElementById('chart-stats').innerHTML=`
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Avg R</div><div class="metric-val ${avgR>=0?'green':'red'}">${avgR.toFixed(2)}R</div></div>
+        <div class="metric-card"><div class="metric-label">Best R</div><div class="metric-val green">${posR.length?Math.max(...posR).toFixed(2):0}R</div></div>
+        <div class="metric-card"><div class="metric-label">Worst R</div><div class="metric-val red">${negR.length?Math.min(...negR).toFixed(2):0}R</div></div>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function fmt(v) {
+  const abs = Math.abs(v);
+  const str = abs.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (v<0?'-':'')+'$'+str;
+}
+function fmtDate(d) { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function calcPF(trades) {
+  const gp = trades.filter(t=>(t.pnl||0)>0).reduce((s,t)=>s+t.pnl,0);
+  const gl = Math.abs(trades.filter(t=>(t.pnl||0)<0).reduce((s,t)=>s+t.pnl,0));
+  return gl===0?(gp>0?'∞':'0'):(gp/gl).toFixed(2);
+}
+function calcExpectancy(trades) {
+  if (!trades.length) return 0;
+  const wins=trades.filter(t=>(t.pnl||0)>0),losses=trades.filter(t=>(t.pnl||0)<0);
+  const wr=wins.length/trades.length;
+  const aw=wins.length?wins.reduce((s,t)=>s+t.pnl,0)/wins.length:0;
+  const al=losses.length?Math.abs(losses.reduce((s,t)=>s+t.pnl,0)/losses.length):0;
+  return (wr*aw)-((1-wr)*al);
+}
+function calcDuration(start, end) {
+  const diff = new Date(end)-new Date(start);
+  const m=Math.floor(diff/60000),h=Math.floor(m/60);
+  return h>0?`${h}h ${m%60}m`:`${m}m`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+applyTheme();
+renderAccountSelector();
+renderDashboard();
+</script>
+
+</body>
+</html>
